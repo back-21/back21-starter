@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { ErrorReporter } from "./_error-reporter";
+import { RouteReporter } from "./_route-reporter";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -19,7 +21,11 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <ErrorReporter />
+        <RouteReporter />
+        {children}
+      </body>
     </html>
   );
 }
