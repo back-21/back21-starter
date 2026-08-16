@@ -6,6 +6,8 @@
  * from it for one reason: `lib/auth.ts` imports `next/headers`, which only
  * resolves inside a Next build, and the header parsing below is the part that
  * has to be testable without one (`tests/identity.test.ts`, `npm test`).
+ * (`lib/auth.ts` and `lib/db.ts` are the two starter-owned importers; `db.ts`
+ * needs `isDeployed`, which is a fact about the process, not the request.)
  *
  * SIGN-IN IS NOT PART OF THIS APP. Back21 sets it up as infrastructure in the
  * customer's own Microsoft Entra directory, in front of the app, so people sign
@@ -128,8 +130,16 @@ const PREVIEW_USER: CurrentUser = {
  * stand-in user in the second case would mean every anonymous visitor to the
  * deployed app is treated as a signed-in person, so the deployed app returns
  * null instead, always.
+ *
+ * EXPORTED FOR EXACTLY ONE OTHER READER: `lib/db.ts`, which branches on the
+ * same fact to decide which database this process talks to (the customer's
+ * PostgreSQL on the deployed app, in-process PGlite everywhere else). One
+ * definition, two readers, on purpose: a copied "am I deployed?" would
+ * eventually disagree with this one, and identity and data would then split
+ * into different worlds. If you change what "deployed" means, you are changing
+ * it for both.
  */
-function isDeployed(): boolean {
+export function isDeployed(): boolean {
   return (
     typeof process !== "undefined" && Boolean(process.env.WEBSITE_SITE_NAME)
   );
